@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D Rotating Image Cards - Yuvraj Edition</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(120deg, #00c6ff, #0072ff, #8e2de2, #4a00e0);
+      background-size: 600% 600%;
+      animation: bgMove 12s ease infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes bgMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* --- LOADER --- */
+    .loader {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(120deg, #00c6ff, #0072ff, #8e2de2, #4a00e0);
+      background-size: 600% 600%;
+      animation: bgMove 12s ease infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 10;
+    }
+
+    .ball {
+      width: 30px;
+      height: 30px;
+      background: radial-gradient(circle at 30% 30%, #fff, #00c6ff, #0072ff);
+      border-radius: 50%;
+      animation: bounce 0.9s infinite alternate ease-in-out;
+    }
+
+    @keyframes bounce {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-100px); }
+    }
+
+    .loader p {
+      color: #fff;
+      margin-top: 20px;
+      font-size: 18px;
+      letter-spacing: 1px;
+    }
+
+    /* --- START SCREEN BUTTON --- */
+    svg {
+      position: absolute;
+      width: 0;
+      height: 0;
+    }
+
+    .backdrop {
+      position: absolute;
+      inset: -9900%;
+      background: radial-gradient(circle at 50% 50%, #0000 0, #0000 20%, #111111aa 50%);
+      background-size: 3px 3px;
+      z-index: -1;
+    }
+
+    .start-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(120deg, #00c6ff, #0072ff, #8e2de2, #4a00e0);
+      background-size: 600% 600%;
+      animation: bgMove 12s ease infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 20;
+    }
+
+    .button {
+      position: relative;
+      cursor: pointer;
+      border: none;
+      width: 150px;
+      height: 55px;
+      background: #111;
+      color: #fff;
+      font-size: 20px;
+      border-radius: 12px;
+    }
+
+    .text {
+      position: relative;
+      z-index: 1;
+    }
+
+    .button::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      background: radial-gradient(circle at 50% 50%, #0000 0, #0000 20%, #111111aa 50%),
+                  radial-gradient(ellipse 100% 100%, #fff, #fff0);
+      background-size: 3px 3px, auto auto;
+      transition: 0.3s;
+    }
+
+    .button:hover::before {
+      opacity: 0.3;
+    }
+
+    .a {
+      pointer-events: none;
+      position: absolute;
+      --w: 2px;
+      --t: -40px;
+      --s: calc(var(--t) * -1);
+      --e: calc(100% + var(--t));
+      --g: #fff0, #fff3 var(--s), #fffa var(--s), #fff, #fffa var(--e),
+        #fff3 var(--e), #fff0;
+    }
+
+    .a::before,
+    .a::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: inherit;
+      filter: blur(4px) url(#unopaq);
+      z-index: -2;
+    }
+
+    .a::after {
+      filter: blur(10px) url(#unopaq);
+      opacity: 0;
+      transition: 0.3s;
+    }
+
+    .button:hover .a::after {
+      opacity: 1;
+    }
+
+    .l { left: -2px; }
+    .r { right: -2px; }
+    .l, .r {
+      background: linear-gradient(var(--g));
+      top: var(--t);
+      bottom: var(--t);
+      width: var(--w);
+    }
+    .t { top: -2px; }
+    .b { bottom: -2px; }
+    .t, .b {
+      background: linear-gradient(90deg, var(--g));
+      left: var(--t);
+      right: var(--t);
+      height: var(--w);
+    }
+
+    /* --- 3D ROTATING CARDS --- */
+    .wrapper {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      text-align: center;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .inner {
+      --w: 220px;
+      --h: 300px;
+      --translateZ: calc((var(--w) + var(--h)) / 1.4);
+      --rotateX: -15deg;
+      --perspective: 1400px;
+      position: absolute;
+      width: var(--w);
+      height: var(--h);
+      top: 20%;
+      left: calc(50% - (var(--w) / 2));
+      z-index: 2;
+      transform-style: preserve-3d;
+      transform: perspective(var(--perspective));
+      animation: rotating 20s linear infinite;
+    }
+
+    @keyframes rotating {
+      from {
+        transform: perspective(var(--perspective)) rotateX(var(--rotateX)) rotateY(0);
+      }
+      to {
+        transform: perspective(var(--perspective)) rotateX(var(--rotateX)) rotateY(1turn);
+      }
+    }
+
+    .card {
+      position: absolute;
+      border: 2px solid rgba(var(--color-card));
+      border-radius: 16px;
+      overflow: hidden;
+      inset: 0;
+      transform: rotateY(calc((360deg / var(--quantity)) * var(--index))) translateZ(var(--translateZ));
+      box-shadow: 0 0 20px rgba(var(--color-card), 0.5);
+      transition: transform 0.3s ease;
+    }
+
+    .img {
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      border-radius: 16px;
+      transition: transform 0.6s ease;
+    }
+
+    .card:hover .img {
+      transform: scale(2.5);
+      z-index: 10;
+    }
+
+    /* --- MUSIC PLAYER BUTTON --- */
+    .music-btn {
+      position: absolute;
+      bottom: 30px;
+      right: 40px;
+      background: #111;
+      border: 2px solid #fff;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 16px;
+      box-shadow: 0 0 15px #fff5;
+      transition: all 0.3s;
+    }
+
+    .music-btn:hover {
+      background: #fff;
+      color: #111;
+      box-shadow: 0 0 25px #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <svg>
+    <filter width="3000%" x="-1000%" height="3000%" y="-1000%" id="unopaq">
+      <feColorMatrix values="1 0 0 0 0 
+                             0 1 0 0 0 
+                             0 0 1 0 0 
+                             0 0 0 3 0"></feColorMatrix>
+    </filter>
+  </svg>
+
+  <!-- Start Screen -->
+  <div class="start-screen">
+    <div class="backdrop"></div>
+    <button class="button" id="startBtn">
+      <div class="a l"></div>
+      <div class="a r"></div>
+      <div class="a t"></div>
+      <div class="a b"></div>
+      <div class="text">Start</div>
+    </button>
+  </div>
+
+  <!-- Loader -->
+  <div class="loader" id="loader">
+    <div class="ball"></div>
+    <p>Loading...</p>
+  </div>
+
+  <!-- 3D Rotating Cards -->
+  <div class="wrapper" id="preview">
+    <div class="inner" style="--quantity: 10;">
+      <!-- Replace these image URLs to change pictures -->
+      <div class="card" style="--index: 0;--color-card: 142,249,252;">
+        <div class="img" style="background-image:url('https://i.ibb.co/3YyR3H06/Aarav-1.jpg');"></div>
+      </div>
+      <div class="card" style="--index:1;--color-card:142,252,204;">
+        <div class="img" style="background-image:url('https://i.ibb.co/G4n3XPs5/yuvraj-1.jpg');"></div>
+      </div>
+      <div class="card" style="--index:2;--color-card:142,252,157;">
+        <div class="img" style="background-image:url('https://i.ibb.co/VcjDp3Ts/aarav-2.jpg');"></div>
+      </div>
+      <div class="card" style="--index:3;--color-card:215,252,142;">
+        <div class="img" style="background-image:url('https://i.ibb.co/RGfVGGTr/yuvraj-2.jpg');"></div>
+      </div>
+      <div class="card" style="--index:4;--color-card:252,252,142;">
+        <div class="img" style="background-image:url('https://i.ibb.co/C3mP9hRt/Aarav-3.jpg');"></div>
+      </div>
+      <div class="card" style="--index:5;--color-card:252,208,142;">
+        <div class="img" style="background-image:url('https://i.ibb.co/7xM6Hf2d/yuvraj-3.jpg');"></div>
+      </div>
+      <div class="card" style="--index:6;--color-card:252,142,142;">
+        <div class="img" style="background-image:url('https://i.ibb.co/VcV9svNG/aarav-4.jpg');"></div>
+      </div>
+      <div class="card" style="--index:7;--color-card:252,142,239;">
+        <div class="img" style="background-image:url('https://i.ibb.co/wNJHfwP1/yuvraj-4.jpg');"></div>
+      </div>
+      <div class="card" style="--index:8;--color-card:204,142,252;">
+        <div class="img" style="background-image:url('https://i.ibb.co/m5WGrWMN/Aarav-5.jpg');"></div>
+      </div>
+      <div class="card" style="--index:9;--color-card:142,202,252;">
+        <div class="img" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMCQU12TGKZfBTpNPq4uadjOXDNh9EcmAXIQ&s');"></div>
+      </div>
+    </div>
+
+    <!-- Music Player -->
+    <button class="music-btn" id="musicBtn">🎵 Play Music</button>
+    <audio id="bgMusic" loop>
+      <!-- 🔊 Replace this MP3 link with your own -->
+      <source src="https://files.catbox.moe/wbf2ow.mp3" type="audio/mpeg">
+    </audio>
+  </div>
+
+  <script>
+    const startBtn = document.getElementById("startBtn");
+    const loader = document.getElementById("loader");
+    const preview = document.getElementById("preview");
+    const startScreen = document.querySelector(".start-screen");
+    const musicBtn = document.getElementById("musicBtn");
+    const bgMusic = document.getElementById("bgMusic");
+
+    startBtn.addEventListener("click", () => {
+      startScreen.style.display = "none";
+      loader.style.display = "flex";
+
+      setTimeout(() => {
+        loader.style.display = "none";
+        preview.style.display = "flex";
+      }, 2500);
+    });
+
+    // Music Control
+    let isPlaying = false;
+    musicBtn.addEventListener("click", () => {
+      if (!isPlaying) {
+        bgMusic.play();
+        musicBtn.textContent = "⏸ Pause Music";
+        isPlaying = true;
+      } else {
+        bgMusic.pause();
+        musicBtn.textContent = "🎵 Play Music";
+        isPlaying = false;
+      }
+    });
+  </script>
+</body>
+</html>
